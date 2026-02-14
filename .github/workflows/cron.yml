@@ -1,0 +1,14 @@
+name: OLX Monitor Cron
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # roda a cada 10 minutos
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel check endpoint
+        run: |
+          curl -sS "${{ secrets.VERCEL_CHECK_URL }}?key=${{ secrets.CRON_SECRET }}&mode=rotate"
