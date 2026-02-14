@@ -1,4 +1,4 @@
-import { ENV } from "./config";
+import { mustEnv } from "./config";
 import type { OlxAd } from "./olxParser";
 
 function escapeHtml(s: string) {
@@ -7,6 +7,10 @@ function escapeHtml(s: string) {
 
 export async function sendTelegramAds(vehicleName: string, ads: OlxAd[]) {
   if (!ads.length) return;
+
+  // Lê env aqui dentro pra não quebrar build
+  const TELEGRAM_BOT_TOKEN = mustEnv("TELEGRAM_BOT_TOKEN");
+  const TELEGRAM_CHAT_ID = mustEnv("TELEGRAM_CHAT_ID");
 
   const MAX_PER_RUN = 5;
   const slice = ads.slice(0, MAX_PER_RUN);
@@ -29,17 +33,17 @@ export async function sendTelegramAds(vehicleName: string, ads: OlxAd[]) {
   }
 
   const text = lines.join("\n");
-  const url = `https://api.telegram.org/bot${ENV.TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      chat_id: ENV.TELEGRAM_CHAT_ID,
+      chat_id: TELEGRAM_CHAT_ID,
       text,
       parse_mode: "HTML",
-      disable_web_page_preview: true
-    })
+      disable_web_page_preview: true,
+    }),
   });
 
   if (!res.ok) {
